@@ -2,3 +2,4 @@
 serenedib-scholarship-ws
 
 This is a nodeJS application
+first commit
