@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: serendib-scholarship-ws
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  StudentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: StudentFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Architectures:
+      - x86_64
+      Events:
+        Student:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+        - app.ts
+        Minify: true
+        Target: es2020
+      SamResourceId: StudentFunction
+Outputs:
+  StudentApi:
+    Description: API Gateway endpoint URL for Prod stage for Student function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/student/
+  StudentFunction:
+    Description: Student Function ARN
+    Value:
+      Fn::GetAtt:
+      - StudentFunction
+      - Arn
+  StudentIamRole:
+    Description: Implicit IAM Role created for Student function
+    Value:
+      Fn::GetAtt:
+      - StudentFunctionRole
+      - Arn
