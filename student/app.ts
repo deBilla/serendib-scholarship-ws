@@ -17,7 +17,12 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     try {
         switch (event.httpMethod) {
             case 'GET':
-                results = await getStudents();
+                if (event.pathParameters.id != null) {
+                    results = await getStudent(event.pathParameters.id);
+                } else {
+                    results = await getStudents();
+                }
+                
                 break;
             case 'POST':
                 results = await createStudents(event);
