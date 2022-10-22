@@ -11,12 +11,31 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
  */
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    let results: any;
     let response: APIGatewayProxyResult;
+
     try {
+        switch (event.httpMethod) {
+            case 'GET':
+                results = await getStudents();
+                break;
+            case 'POST':
+                results = await createStudents(event);
+                break;
+            case 'PUT':
+                results = await updateStudents(event.pathParameters.id)
+                break;
+            case 'DELETE':
+                results = await deleteStudents(event.pathParameters.id)
+                break;
+            default:
+                throw new Error('Unidentified event!!!');
+        }
+        
         response = {
             statusCode: 200,
             body: JSON.stringify({
-                message: 'hello world',
+                message: results,
             }),
         };
     } catch (err: unknown) {
@@ -31,3 +50,23 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
 
     return response;
 };
+
+const getStudents = async () => {
+    return ['james', 'john'];
+}
+
+const getStudent = async (studentId: string) => {
+    return studentId;
+}
+
+const createStudents = async (event: APIGatewayProxyEvent) => {
+    return event;
+}
+
+const updateStudents = async (event: APIGatewayProxyEvent) => {
+    return event;
+}
+
+const deleteStudents = async (studentId: string) => {
+    return studentId;
+}
