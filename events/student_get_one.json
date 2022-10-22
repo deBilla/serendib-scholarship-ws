@@ -7,7 +7,7 @@
     "foo": "bar"
   },
   "pathParameters": {
-    "id": 1,
+    "id": "642045d3-8939-4e83-894f-8be429928df0",
     "proxy": "/path/to/resource"
   },
   "stageVariables": {

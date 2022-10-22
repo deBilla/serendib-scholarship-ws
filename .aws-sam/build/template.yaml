@@ -13,6 +13,14 @@ Resources:
       Runtime: nodejs16.x
       Architectures:
       - x86_64
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: SampleTable
+      Environment:
+        Variables:
+          SAMPLE_TABLE:
+            Ref: SampleTable
       Events:
         Student:
           Type: Api
@@ -27,20 +35,17 @@ Resources:
         Minify: true
         Target: es2020
       SamResourceId: StudentFunction
+  SampleTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
 Outputs:
-  StudentApi:
-    Description: API Gateway endpoint URL for Prod stage for Student function
+  WebEndpoint:
+    Description: API Gateway endpoint URL for Prod stage
     Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/student/
-  StudentFunction:
-    Description: Student Function ARN
-    Value:
-      Fn::GetAtt:
-      - StudentFunction
-      - Arn
-  StudentIamRole:
-    Description: Implicit IAM Role created for Student function
-    Value:
-      Fn::GetAtt:
-      - StudentFunctionRole
-      - Arn
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
