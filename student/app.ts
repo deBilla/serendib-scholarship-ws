@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient,  ScanCommand, PutItemCommand, GetItemCommand, DeleteItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,26 +12,32 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     let response: APIGatewayProxyResult;
 
     try {
-        switch (event.httpMethod) {
-            case 'GET':
-                if (event.pathParameters.id != null) {
-                    results = await getStudent(event.pathParameters.id);
-                } else {
-                    results = await getStudents();
-                }
-                
-                break;
-            case 'POST':
-                results = await createStudents(event);
-                break;
-            case 'PUT':
-                results = await updateStudents(event)
-                break;
-            case 'DELETE':
-                results = await deleteStudents(event.pathParameters.id)
-                break;
-            default:
-                throw new Error('Unidentified event!!!');
+        if (event.httpMethod) {
+            switch (event.httpMethod) {
+                case 'GET':
+                    if (event.pathParameters.id != null) {
+                        results = await getStudent(event.pathParameters.id);
+                    } else {
+                        results = await getStudents();
+                    }
+                    
+                    break;
+                case 'POST':
+                    results = await createStudents(event);
+                    break;
+                case 'PUT':
+                    results = await updateStudents(event)
+                    break;
+                case 'DELETE':
+                    results = await deleteStudents(event.pathParameters.id)
+                    break;
+                default:
+                    throw new Error('Unidentified event!!!');
+            }
+        } else if (event['Records'][0]['s3']) {
+            const key = event['Records'][0]['s3']['object']['key'];
+            const id = "f682386e-e34f-4d9f-b6f4-9398fb6a131d";
+            results = await updateStudentFileName(key, id);
         }
         
         response = {
@@ -117,6 +124,42 @@ const updateStudents = async (event: APIGatewayProxyEvent) => {
         };
     
         return await client.send(new UpdateItemCommand(params));
+    } catch(e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+const updateStudentFileName = async (key: string, id: string) => {
+    console.log(key);
+
+    try {
+        const paramsGet = {
+            TableName: tableName,
+            Key: marshall({ id: id })
+        };
+
+        const { Item } = await client.send(new GetItemCommand(paramsGet));
+        const item = unmarshall(Item);
+        console.log(item.files);
+        const files = item.files ? [...item.files, {name: key}] : [{name: key}]
+
+        const params = {
+          TableName: tableName,
+          Item: {
+            id: id,
+            files: files,
+            name: item.name,
+            age: item.age
+          }
+        };
+
+        const docClient = DynamoDBDocumentClient.from(client);
+
+        let res = await docClient.send(new PutCommand(params));
+        console.log(res)
+    
+        return res;
     } catch(e) {
         console.error(e);
         throw e;

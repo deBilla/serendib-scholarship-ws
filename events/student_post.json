@@ -1,5 +1,5 @@
 {
-  "body": "{\"age\": \"15\",\"name\": \"name1\"}",
+  "body": "{\"age\": \"15\",\"name\": \"name1\",\"files\": \"\"}",
   "resource": "/{proxy+}",
   "path": "/path/to/resource",
   "httpMethod": "POST",

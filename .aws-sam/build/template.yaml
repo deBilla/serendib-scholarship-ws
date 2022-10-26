@@ -17,16 +17,28 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: SampleTable
+      - S3CrudPolicy:
+          BucketName:
+            Ref: FileBucket
       Environment:
         Variables:
           SAMPLE_TABLE:
             Ref: SampleTable
+          FILE_BUCKET:
+            Ref: FileBucket
       Events:
         Student:
           Type: Api
           Properties:
             Path: /student
             Method: get
+        FileUpload:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: FileBucket
+            Events:
+            - s3:ObjectCreated:*
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -35,6 +47,8 @@ Resources:
         Minify: true
         Target: es2020
       SamResourceId: StudentFunction
+  FileBucket:
+    Type: AWS::S3::Bucket
   SampleTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
