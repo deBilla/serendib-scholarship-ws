@@ -15,8 +15,8 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         if (event.httpMethod) {
             switch (event.httpMethod) {
                 case 'GET':
-                    if (event.pathParameters.id != null) {
-                        results = await getStudent(event.pathParameters.id);
+                    if (event.queryStringParameters && event.queryStringParameters.id != null) {
+                        results = await getStudent(event.queryStringParameters.id);
                     } else {
                         results = await getStudents();
                     }
@@ -29,7 +29,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                     results = await updateStudents(event)
                     break;
                 case 'DELETE':
-                    results = await deleteStudents(event.pathParameters.id)
+                    results = await deleteStudents(event.queryStringParameters.id)
                     break;
                 default:
                     throw new Error('Unidentified event!!!');
@@ -111,7 +111,7 @@ const updateStudents = async (event: APIGatewayProxyEvent) => {
     
         const params = {
           TableName: tableName,
-          Key: marshall({ id: event.pathParameters.id }),
+          Key: marshall({ id: event.queryStringParameters.id }),
           UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
           ExpressionAttributeNames: objKeys.reduce((acc, key, index) => ({
               ...acc,

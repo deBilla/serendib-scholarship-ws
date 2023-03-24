@@ -5,6 +5,15 @@ Globals:
   Function:
     Timeout: 3
 Resources:
+  SampleTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   StudentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -17,28 +26,31 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: SampleTable
-      - S3CrudPolicy:
-          BucketName:
-            Ref: FileBucket
       Environment:
         Variables:
           SAMPLE_TABLE:
             Ref: SampleTable
-          FILE_BUCKET:
-            Ref: FileBucket
       Events:
-        Student:
+        GetStudent:
           Type: Api
           Properties:
             Path: /student
             Method: get
-        FileUpload:
-          Type: S3
+        CreateStudent:
+          Type: Api
           Properties:
-            Bucket:
-              Ref: FileBucket
-            Events:
-            - s3:ObjectCreated:*
+            Path: /student
+            Method: post
+        UpdateStudent:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: put
+        DeleteStudent:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: delete
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -47,17 +59,6 @@ Resources:
         Minify: true
         Target: es2020
       SamResourceId: StudentFunction
-  FileBucket:
-    Type: AWS::S3::Bucket
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
 Outputs:
   WebEndpoint:
     Description: API Gateway endpoint URL for Prod stage
