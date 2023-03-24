@@ -4,9 +4,24 @@ Description: serendib-scholarship-ws
 Globals:
   Function:
     Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'*'"
 
 Resources:
   SampleTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+  SponsorTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
@@ -50,6 +65,50 @@ Resources:
           Type: Api
           Properties:
             Path: /student
+            Method: delete
+
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        EntryPoints: 
+        - app.ts
+
+  SponsorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: sponsor/
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SponsorTable
+      Environment:
+        Variables:
+          SPONSOR_TABLE: !Ref SponsorTable
+      Events:
+        GetStudent:
+          Type: Api
+          Properties:
+            Path: /sponsor
+            Method: get
+        CreateStudent:
+          Type: Api
+          Properties:
+            Path: /sponsor
+            Method: post
+        UpdateStudent:
+          Type: Api
+          Properties:
+            Path: /sponsor
+            Method: put
+        DeleteStudent:
+          Type: Api
+          Properties:
+            Path: /sponsor
             Method: delete
 
     Metadata:

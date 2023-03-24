@@ -4,7 +4,7 @@ import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { v4 as uuidv4 } from 'uuid';
 
-const tableName = process.env.SAMPLE_TABLE;
+const tableName = process.env.SPONSOR_TABLE;
 const client = new DynamoDBClient({ region: "us-east-1" });
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -16,20 +16,20 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             switch (event.httpMethod) {
                 case 'GET':
                     if (event.queryStringParameters && event.queryStringParameters.id != null) {
-                        results = await getStudent(event.queryStringParameters.id);
+                        results = await getSponsor(event.queryStringParameters.id);
                     } else {
-                        results = await getStudents();
+                        results = await getSponsors();
                     }
                     
                     break;
                 case 'POST':
-                    results = await createStudents(event);
+                    results = await createSponsors(event);
                     break;
                 case 'PUT':
-                    results = await updateStudents(event)
+                    results = await updateSponsors(event)
                     break;
                 case 'DELETE':
-                    results = await deleteStudents(event.queryStringParameters.id)
+                    results = await deleteSponsors(event.queryStringParameters.id)
                     break;
                 default:
                     throw new Error('Unidentified event!!!');
@@ -37,7 +37,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         } else if (event['Records'][0]['s3']) {
             const key = event['Records'][0]['s3']['object']['key'];
             const id = "f682386e-e34f-4d9f-b6f4-9398fb6a131d";
-            results = await updateStudentFileName(key, id);
+            results = await updateSponsorFileName(key, id);
         }
         
         response = {
@@ -45,7 +45,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             headers: {
                 "Access-Control-Allow-Headers" : "Content-Type",
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "*"
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
             },
             body: JSON.stringify({
                 message: results,
@@ -69,7 +69,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     return response;
 };
 
-const getStudents = async () => {
+const getSponsors = async () => {
     try {
         const params = {
             TableName : tableName
@@ -82,11 +82,11 @@ const getStudents = async () => {
     }
 }
 
-const getStudent = async (studentId: string) => {
+const getSponsor = async (sponsorId: string) => {
     try {
         const params = {
             TableName: tableName,
-            Key: marshall({ id: studentId })
+            Key: marshall({ id: sponsorId })
         };
 
         const { Item } = await client.send(new GetItemCommand(params));
@@ -97,15 +97,15 @@ const getStudent = async (studentId: string) => {
     }
 }
 
-const createStudents = async (event: APIGatewayProxyEvent) => {
+const createSponsors = async (event: APIGatewayProxyEvent) => {
     try {
-        const student = JSON.parse(event.body);
-        const studentId = uuidv4();
-        student.id = studentId;
+        const sponsor = JSON.parse(event.body);
+        const sponsorId = uuidv4();
+        sponsor.id = sponsorId;
 
         const params = {
             TableName: tableName,
-            Item: marshall(student || {})
+            Item: marshall(sponsor || {})
         };
 
         return await client.send(new PutItemCommand(params));
@@ -114,7 +114,7 @@ const createStudents = async (event: APIGatewayProxyEvent) => {
     }
 }
 
-const updateStudents = async (event: APIGatewayProxyEvent) => {
+const updateSponsors = async (event: APIGatewayProxyEvent) => {
     try {
         const requestBody = JSON.parse(event.body);
         const objKeys = Object.keys(requestBody);   
@@ -140,7 +140,7 @@ const updateStudents = async (event: APIGatewayProxyEvent) => {
     }
 }
 
-const updateStudentFileName = async (key: string, id: string) => {
+const updateSponsorFileName = async (key: string, id: string) => {
     console.log(key);
 
     try {
@@ -176,11 +176,11 @@ const updateStudentFileName = async (key: string, id: string) => {
     }
 }
 
-const deleteStudents = async (studentId: string) => {
+const deleteSponsors = async (sponsorId: string) => {
     try {
         const params = {
           TableName: tableName,
-          Key: marshall({ id: studentId }),
+          Key: marshall({ id: sponsorId }),
         };
     
         return await client.send(new DeleteItemCommand(params));
