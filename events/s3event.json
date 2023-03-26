@@ -23,8 +23,8 @@
                     "ownerIdentity": {
                         "principalId": "EXAMPLE"
                     }, 
-                    "name": "serendib-ui", 
-                    "arn": "arn:aws:s3:::serendib-ui"
+                    "name": "serendib-filebucket-piqiolmft1t3", 
+                    "arn": "arn:aws:s3:::serendib-filebucket-piqiolmft1t3"
                 }, 
                 "s3SchemaVersion": "1.0"
             }, 

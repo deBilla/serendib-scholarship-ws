@@ -31,6 +31,9 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
 
+  FileBucket:
+    Type: 'AWS::S3::Bucket'
+
   StudentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -66,6 +69,12 @@ Resources:
           Properties:
             Path: /student
             Method: delete
+        FileUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref FileBucket
+            Events:
+              - 's3:ObjectCreated:*'
 
     Metadata:
       BuildMethod: esbuild

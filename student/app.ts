@@ -36,7 +36,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             }
         } else if (event['Records'][0]['s3']) {
             const key = event['Records'][0]['s3']['object']['key'];
-            const id = "f682386e-e34f-4d9f-b6f4-9398fb6a131d";
+            const id = "0fb8725f-bd43-4dc8-8ba6-95489e0478a8";
             results = await updateStudentFileName(key, id);
         }
         
@@ -151,16 +151,16 @@ const updateStudentFileName = async (key: string, id: string) => {
 
         const { Item } = await client.send(new GetItemCommand(paramsGet));
         const item = unmarshall(Item);
+       
+        const files = item && item.files ? [...item.files, {name: key}] : [{name: key}];
+
         console.log(item.files);
-        const files = item.files ? [...item.files, {name: key}] : [{name: key}]
 
         const params = {
           TableName: tableName,
           Item: {
             id: id,
-            files: files,
-            name: item.name,
-            age: item.age
+            files: files
           }
         };
 

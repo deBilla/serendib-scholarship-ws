@@ -45,6 +45,9 @@ EntryPoints = ["app.ts"]
 
 
 
+
+
+
 [function_build_definitions.fd22ace6-8f6a-4605-a34e-1a82bfbca5a5]
 codeuri = "/Users/dimuthu/billa/serendib-scholarship-ws/sponsor"
 runtime = "nodejs16.x"
@@ -61,6 +64,9 @@ BuildMethod = "esbuild"
 Minify = true
 Target = "es2020"
 EntryPoints = ["app.ts"]
+
+
+
 
 
 
